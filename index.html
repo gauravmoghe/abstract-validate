@@ -182,9 +182,12 @@
     (function () {
       var records = [];
       var currentIndex = 0;
-      var storageKey = "pmc_sample_100_labels_v2";
+      var storageKey = "pmc_sample_100_labels_v3";
       var labels = {};
       var el = {};
+      var TAB = String.fromCharCode(9);
+      var LF = String.fromCharCode(10);
+      var CR = String.fromCharCode(13);
 
       function showError(message) {
         var box = document.getElementById("errorBox");
@@ -249,10 +252,9 @@
       function setActiveChoice(label) {
         var buttons = document.querySelectorAll(".choice");
         for (var i = 0; i < buttons.length; i += 1) {
+          buttons[i].className = buttons[i].className.split(" active").join("");
           if (buttons[i].getAttribute("data-label") === label) {
             buttons[i].className += " active";
-          } else {
-            buttons[i].className = buttons[i].className.replace(/\s*active/g, "");
           }
         }
       }
@@ -283,24 +285,24 @@
       }
 
       function tsvEscape(value) {
-        return String(value || "").replace(/	/g, " ").replace(/
-?
-/g, " ").replace(/\s+/g, " ").trim();
+        return String(value || "")
+          .split(TAB).join(" ")
+          .split(CR).join(" ")
+          .split(LF).join(" ")
+          .trim();
       }
 
       function downloadTsv() {
-        var lines = ["PMCID	Title	Response"];
+        var lines = [["PMCID", "Title", "Response"].join(TAB)];
         for (var i = 0; i < records.length; i += 1) {
           var record = records[i];
           if (!labels[record.pmcid]) {
             alert("Please label all 100 abstracts before downloading.");
             return;
           }
-          lines.push([record.pmcid, record.title, labels[record.pmcid]].map(tsvEscape).join("	"));
+          lines.push([record.pmcid, record.title, labels[record.pmcid]].map(tsvEscape).join(TAB));
         }
-        var blob = new Blob([lines.join("
-") + "
-"], { type: "text/tab-separated-values;charset=utf-8" });
+        var blob = new Blob([lines.join(LF) + LF], { type: "text/tab-separated-values;charset=utf-8" });
         var url = URL.createObjectURL(blob);
         var link = document.createElement("a");
         link.href = url;
