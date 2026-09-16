@@ -1091,13 +1091,11 @@
         alert(`${missing.length} abstracts still need labels.`);
         return;
       }
-      const lines = ["PMCID	Title	Response"];
+      const lines = ["PMCID\tTitle\tResponse"];
       for (const record of records) {
-        lines.push([record.pmcid, record.title, labels[record.pmcid]].map(tsvEscape).join("	"));
+        lines.push([record.pmcid, record.title, labels[record.pmcid]].map(tsvEscape).join("\t"));
       }
-      const blob = new Blob([lines.join("
-") + "
-"], { type: "text/tab-separated-values;charset=utf-8" });
+      const blob = new Blob([lines.join("\n") + "\n"], { type: "text/tab-separated-values;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
